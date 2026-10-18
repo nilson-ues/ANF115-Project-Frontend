@@ -1,0 +1,96 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Tablero financiero</h1>
+      @if (datos(); as d) {
+        <div class="sub">{{ d.empresa.razonSocial }} · {{ d.empresa.tamano }} · Cifras acumuladas a {{ d.hastaMes | mes: true }} {{ d.anio }}</div>
+      }
+    </div>
+    <div class="acciones">
+      @if (datos(); as d) {
+        <mat-form-field appearance="outline" class="compacto">
+          <mat-label>Año</mat-label>
+          <mat-select [ngModel]="anio() ?? d.anio" (ngModelChange)="anio.set($event)">
+            @for (a of d.anios; track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <df-teoria [temas]="teoria()" fuente="Indicadores del tablero" />
+      }
+    </div>
+  </div>
+
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  @if (datos(); as d) {
+    <div class="kpis">
+      <div class="kpi">
+        <div class="etiqueta">Ventas netas</div>
+        <div class="valor">{{ d.kpis['ventasNetas'] | dinero: true }}</div>
+        @if (avanceVentas() !== null) {
+          <div class="barra"><div [style.width.%]="(avanceVentas()! * 100) > 100 ? 100 : avanceVentas()! * 100"></div></div>
+          <div class="detalle">{{ avanceVentas() | pct }} del presupuesto ({{ d.kpis['ventasPresupuesto'] | dinero: true }})</div>
+        } @else { <div class="detalle">Sin presupuesto registrado</div> }
+      </div>
+      <div class="kpi">
+        <div class="etiqueta">Utilidad del ejercicio</div>
+        <div class="valor" [class.negativo]="+(d.kpis['utilidadEjercicio'] ?? 0) < 0">{{ d.kpis['utilidadEjercicio'] | dinero: true }}</div>
+        <div class="detalle">Presupuesto: {{ d.kpis['utilidadPresupuesto'] | dinero: true }}</div>
+      </div>
+      <div class="kpi">
+        <div class="etiqueta">Capital de trabajo neto</div>
+        <div class="valor">{{ d.kpis['capitalTrabajo'] | dinero: true }}</div>
+        <div class="detalle">Activo corriente − Pasivo corriente</div>
+      </div>
+      <div class="kpi">
+        <div class="etiqueta">Efectivo y equivalentes</div>
+        <div class="valor">{{ d.kpis['efectivo'] | dinero: true }}</div>
+        <div class="detalle">Activo total: {{ d.kpis['activoTotal'] | dinero: true }}</div>
+      </div>
+      <div class="kpi supervivencia" [class.cumple]="d.supervivencia.cumple === true" [class.falla]="d.supervivencia.cumple === false">
+        <div class="etiqueta">Condición de supervivencia</div>
+        <div class="valor">ROA {{ d.supervivencia.roa | pct }}</div>
+        @if (d.supervivencia.costoCapital === null) {
+          <div class="detalle">Configure el costo de capital en Parámetros</div>
+        } @else {
+          <div class="detalle">
+            {{ d.supervivencia.cumple ? 'Cumple' : 'No cumple' }}: costo de capital {{ d.supervivencia.costoCapital | pct }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="graficos">
+      <div class="tarjeta ancho">
+        <h2>Ventas netas por mes: real vs. presupuesto</h2>
+        <div class="lienzo"><canvas baseChart type="bar" [data]="graficoVentas()" [options]="opcionesBarras"></canvas></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Composición del activo corriente</h2>
+        <div class="lienzo"><canvas baseChart type="doughnut" [data]="graficoActivo()" [options]="opcionesDona"></canvas></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Efectivo al cierre de cada mes</h2>
+        <div class="lienzo"><canvas baseChart type="line" [data]="graficoEfectivo()" [options]="opcionesLinea"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="seccion">Indicadores por decisión financiera</h2>
+    <div class="decisiones">
+      @for (dec of decisiones; track dec.nombre) {
+        <div class="tarjeta">
+          <h2>Decisión de {{ dec.nombre.toLowerCase() }}</h2>
+          <div class="desc">{{ dec.descripcion }}</div>
+          @for (r of razonesPor(dec.nombre); track r.clave) {
+            <div class="razon" [matTooltip]="r.formula">
+              <span class="punto" [class]="r.semaforo"></span>
+              <span class="nombre">{{ r.nombre }}</span>
+              <span class="num valor">{{ r.valor | razon: r.unidad }}</span>
+              <span class="num ref">{{ (r.estandar ?? r.presupuesto ?? r.anterior) | razon: r.unidad }}</span>
+            </div>
+          }
+          <div class="leyenda">Comparado contra {{ razonesPor(dec.nombre)[0]?.referencia }}</div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,74 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Razones financieras</h1>
+      @if (datos(); as d) { <div class="sub">Base: {{ d.base }}</div> }
+    </div>
+    <div class="acciones">
+      <mat-button-toggle-group [ngModel]="vista()" (ngModelChange)="vista.set($event)" hideSingleSelectionIndicator>
+        <mat-button-toggle value="categoria">Por categoría</mat-button-toggle>
+        <mat-button-toggle value="decision">Por decisión</mat-button-toggle>
+      </mat-button-toggle-group>
+      <df-periodo [(anio)]="anio" [(mes)]="mes" [conEscenario]="false" />
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  @if (datos(); as d) {
+    <div class="layout">
+      <div class="tabla-scroll">
+        <table class="estado">
+          <thead>
+            <tr>
+              <th>Razón</th>
+              <th>{{ d.anio }}</th>
+              <th>Año anterior</th>
+              <th>Presupuesto</th>
+              <th>Estándar industria</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of grupos(); track g.nombre) {
+              <tr class="nivel-1"><td colspan="5">{{ g.nombre }}</td></tr>
+              @for (r of g.razones; track r.clave) {
+                <tr class="fila" [class.seleccionada]="seleccion()?.clave === r.clave" (click)="seleccion.set(r)">
+                  <td>{{ r.nombre }}</td>
+                  <td class="num fuerte">{{ r.valor | razon: r.unidad }}</td>
+                  <td class="num"><span class="punto" [class]="r.semaforoAnterior" [matTooltip]="textoSemaforo(r.semaforoAnterior)"></span> {{ r.anterior | razon: r.unidad }}</td>
+                  <td class="num"><span class="punto" [class]="r.semaforoPresupuesto" [matTooltip]="textoSemaforo(r.semaforoPresupuesto)"></span> {{ r.presupuesto | razon: r.unidad }}</td>
+                  <td class="num"><span class="punto" [class]="r.semaforoEstandar" [matTooltip]="textoSemaforo(r.semaforoEstandar)"></span> {{ r.estandar | razon: r.unidad }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (seleccion(); as r) {
+        <aside class="tarjeta detalle">
+          <div class="cat">{{ r.categoria }} · Decisión de {{ r.decision.toLowerCase() }}</div>
+          <h2>{{ r.nombre }}</h2>
+          <div class="valor">{{ r.valor | razon: r.unidad }}</div>
+          <div class="formula">{{ r.formula }}</div>
+          <h3>¿Qué significa?</h3>
+          <p>{{ r.definicion }}</p>
+          <h3>¿Cómo se interpreta?</h3>
+          <p>{{ r.interpretacion }}</p>
+          @if (r.clave === 'periodo_cobro' && d.plazoCredito) {
+            <div class="aviso" [class.ok]="(r.valor ?? 0) <= d.plazoCredito">
+              Plazo de crédito a clientes: {{ d.plazoCredito }} días. La empresa cobra en promedio en {{ r.valor | razon: 'dias' }}.
+            </div>
+          }
+          <div class="direccion">{{ direccion(r) }}</div>
+          <div class="comparaciones">
+            <div><span class="chip" [class]="r.semaforoAnterior">{{ textoSemaforo(r.semaforoAnterior) }}</span> vs. año anterior (series temporales)</div>
+            <div><span class="chip" [class]="r.semaforoPresupuesto">{{ textoSemaforo(r.semaforoPresupuesto) }}</span> vs. presupuesto</div>
+            <div><span class="chip" [class]="r.semaforoEstandar">{{ textoSemaforo(r.semaforoEstandar) }}</span> vs. industria (muestra representativa)</div>
+          </div>
+          <div class="fuente">{{ r.fuente }}</div>
+        </aside>
+      }
+    </div>
+  }
+</div>

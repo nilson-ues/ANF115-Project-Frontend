@@ -1,0 +1,30 @@
+<div class="pantalla">
+  <section class="presentacion">
+    <div class="logo">DF</div>
+    <h1>DistriFarma ERP</h1>
+    <p class="lema">Sistema de información financiera para la toma de decisiones</p>
+    <ul>
+      <li><span class="material-symbols-outlined">balance</span> Estados financieros mensuales y acumulados</li>
+      <li><span class="material-symbols-outlined">query_stats</span> Razones financieras con semáforo y comparativos</li>
+      <li><span class="material-symbols-outlined">event_note</span> Presupuesto, estados pro forma y control presupuestario</li>
+    </ul>
+    <div class="pie">Distribuidora Farmacéutica, S.A. de C.V. · ANF115 Administración Financiera · UES</div>
+  </section>
+  <section class="formulario">
+    <form [formGroup]="form" (ngSubmit)="entrar()">
+      <h2>Iniciar sesión</h2>
+      <p class="sub">Ingrese con su usuario asignado</p>
+      @if (error()) { <div class="aviso error">{{ error() }}</div> }
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput formControlName="email" type="email" autocomplete="username" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput formControlName="password" type="password" autocomplete="current-password" />
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="form.invalid || cargando()">Entrar</button>
+      @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+    </form>
+  </section>
+</div>

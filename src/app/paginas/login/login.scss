@@ -1,0 +1,36 @@
+.pantalla { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 100vh; }
+
+.presentacion {
+  background: radial-gradient(circle at 20% 20%, #16385a, #0f2a44 60%);
+  color: #d5e2ee;
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+
+  .logo { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #14b8a6, #0f766e);
+    display: grid; place-items: center; color: white; font-weight: 700; font-size: 22px; }
+  h1 { color: white; font-size: 34px; margin: 8px 0 0; letter-spacing: -0.02em; }
+  .lema { font-size: 16px; color: #9fb4c8; margin: 0 0 18px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  li { display: flex; gap: 12px; align-items: center; font-size: 15px; }
+  li .material-symbols-outlined { color: #5eead4; }
+  .pie { margin-top: 48px; font-size: 12px; color: #7f97ae; }
+}
+
+.formulario {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+
+  form { width: min(380px, 100%); display: flex; flex-direction: column; gap: 6px; }
+  h2 { margin: 0; font-size: 24px; }
+  .sub { color: var(--df-muted); margin: 4px 0 20px; }
+  button { height: 44px; }
+}
+
+@media (max-width: 860px) {
+  .pantalla { grid-template-columns: 1fr; }
+  .presentacion { padding: 32px; }
+}

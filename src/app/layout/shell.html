@@ -1,0 +1,62 @@
+<div class="contenedor" [class.colapsado]="colapsado()">
+  <aside class="lateral">
+    <div class="marca">
+      <div class="logo">DF</div>
+      @if (!colapsado()) {
+        <div>
+          <div class="nombre">DistriFarma</div>
+          <div class="sistema">ERP financiero</div>
+        </div>
+      }
+    </div>
+    <nav>
+      @for (grupo of menu(); track grupo.titulo) {
+        <div class="grupo">
+          @if (!colapsado()) {
+            <div class="titulo-grupo">
+              {{ grupo.titulo }}
+              <span class="chips">
+                @if (grupo.etiqueta) { <span class="etiqueta">{{ grupo.etiqueta }}</span> }
+                @if (grupo.unidad) { <span class="unidad">{{ grupo.unidad }}</span> }
+              </span>
+            </div>
+          }
+          @for (item of grupo.items; track item.ruta) {
+            <a [routerLink]="item.ruta" routerLinkActive="activo" class="item" [matTooltip]="colapsado() ? item.titulo : ''" matTooltipPosition="right">
+              <span class="material-symbols-outlined">{{ item.icono }}</span>
+              @if (!colapsado()) {
+                <span class="texto">{{ item.titulo }}</span>
+              }
+            </a>
+          }
+        </div>
+      }
+    </nav>
+  </aside>
+  <div class="principal">
+    <header class="barra">
+      <button mat-icon-button (click)="colapsado.set(!colapsado())" aria-label="Menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="empresa">Distribuidora Farmacéutica, S.A. de C.V.</div>
+      <span class="espacio"></span>
+      <button class="usuario" [matMenuTriggerFor]="menuUsuario">
+        <span class="avatar">{{ iniciales() }}</span>
+        <span class="datos">
+          <span class="nombre">{{ auth.usuario()?.nombre }}</span>
+          <span class="rol">{{ rolTexto() }}</span>
+        </span>
+        <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <mat-menu #menuUsuario="matMenu">
+        <button mat-menu-item disabled>{{ auth.usuario()?.email }}</button>
+        <button mat-menu-item (click)="auth.logout()">
+          <span class="material-symbols-outlined">logout</span> Cerrar sesión
+        </button>
+      </mat-menu>
+    </header>
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+</div>

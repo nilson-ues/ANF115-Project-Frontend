@@ -1,0 +1,23 @@
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.fila { cursor: pointer; }
+.fila.seleccionada td { background: var(--df-accent-soft) !important; }
+.fuerte { font-weight: 700; }
+.punto { margin-right: 6px; vertical-align: middle; }
+
+.detalle {
+  position: sticky;
+  top: 16px;
+
+  .cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--df-accent); font-weight: 600; }
+  h2 { font-size: 18px; margin: 6px 0 4px; }
+  .valor { font-size: 30px; font-weight: 700; color: var(--df-navy); font-variant-numeric: tabular-nums; }
+  .formula { font-family: Menlo, monospace; font-size: 12.5px; background: var(--df-accent-soft); padding: 10px 12px; border-radius: 8px; margin: 12px 0; }
+  h3 { font-size: 13px; margin: 14px 0 4px; }
+  p { margin: 0; line-height: 1.5; font-size: 13px; }
+  .direccion { font-size: 12px; color: var(--df-muted); margin: 12px 0; }
+  .comparaciones { display: grid; gap: 8px; font-size: 12px; color: var(--df-muted); }
+  .fuente { margin-top: 14px; font-size: 11px; color: var(--df-muted); }
+  .aviso { margin: 12px 0 0; }
+}
+
+@media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } .detalle { position: static; } }

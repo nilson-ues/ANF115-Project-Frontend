@@ -1,0 +1,60 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Control presupuestario</h1>
+      <div class="sub">Comparativo real vs. presupuesto con variaciones y semáforo según la tolerancia configurada</div>
+    </div>
+    <div class="acciones">
+      <df-periodo [(anio)]="anio" [(mes)]="mes" [conEscenario]="false" />
+      <df-teoria [temas]="teorias()" fuente="Unidad III" />
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+  @if (datos(); as d) {
+    <div class="resumen">
+      <div class="tarjeta">
+        <div class="etiqueta">Desviaciones fuera de tolerancia</div>
+        <div class="grande" [class.negativo]="alertas() > 0">{{ alertas() }}</div>
+        <div class="nota">Tolerancia: {{ d.tolerancia | pct }}</div>
+      </div>
+      <div class="tarjeta vub">
+        <h2>Descomposición de la variación de la utilidad bruta</h2>
+        <div class="fila"><span>Por venta no lograda</span><span class="num" [class.negativo]="neg(d.variacionUtilidadBruta.porVentaNoLograda)">{{ d.variacionUtilidadBruta.porVentaNoLograda | dinero: true }}</span></div>
+        <div class="fila"><span>Por margen no logrado</span><span class="num" [class.negativo]="neg(d.variacionUtilidadBruta.porMargenNoLogrado)">{{ d.variacionUtilidadBruta.porMargenNoLogrado | dinero: true }}</span></div>
+        <div class="fila total"><span>Variación total</span><span class="num" [class.negativo]="neg(d.variacionUtilidadBruta.total)">{{ d.variacionUtilidadBruta.total | dinero: true }}</span></div>
+        <div class="nota">Margen bruto real {{ d.variacionUtilidadBruta.margenReal | pct }} · presupuestado {{ d.variacionUtilidadBruta.margenPresupuesto | pct }}</div>
+      </div>
+    </div>
+    <mat-tab-group animationDuration="0">
+      <mat-tab label="Estado de resultados"><ng-container *ngTemplateOutlet="tabla; context: { filas: d.resultados }" /></mat-tab>
+      <mat-tab label="Balance general"><ng-container *ngTemplateOutlet="tabla; context: { filas: d.balance }" /></mat-tab>
+    </mat-tab-group>
+  }
+</div>
+
+<ng-template #tabla let-filas="filas">
+  <div class="tabla-scroll espacio">
+    <table class="estado">
+      <thead><tr><th>Concepto</th><th>Real</th><th>Presupuesto</th><th>Variación $</th><th>Variación %</th><th>Estado</th></tr></thead>
+      <tbody>
+        @for (f of filas; track $index) {
+          <tr [class]="f.tipo ?? ('nivel-' + f.nivel)">
+            <td>{{ f.nombre }}</td>
+            <td class="num" [class.negativo]="neg(f.real)">{{ f.real | dinero }}</td>
+            <td class="num" [class.negativo]="neg(f.presupuesto)">{{ f.presupuesto | dinero }}</td>
+            <td class="num" [class.negativo]="neg(f.variacion)">{{ f.variacion | dinero }}</td>
+            <td class="num">{{ f.variacionPct | pct }}</td>
+            <td>
+              @if (f.variacion !== '0.00') {
+                <span class="chip" [class]="f.alerta ? 'rojo' : f.estado === 'favorable' ? 'verde' : 'amarillo'">
+                  {{ f.alerta ? 'Desviación' : f.estado === 'favorable' ? 'Favorable' : 'En tolerancia' }}
+                </span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>

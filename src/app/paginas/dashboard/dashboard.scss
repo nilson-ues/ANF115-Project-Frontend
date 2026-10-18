@@ -1,0 +1,47 @@
+.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+
+.kpi {
+  background: white;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+
+  .etiqueta { font-size: 12px; color: var(--df-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  .valor { font-size: 22px; font-weight: 700; margin: 6px 0; font-variant-numeric: tabular-nums; }
+  .detalle { font-size: 12px; color: var(--df-muted); }
+  .barra { height: 6px; background: var(--df-gris-bg); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+  .barra div { height: 100%; background: var(--df-accent); }
+
+  &.supervivencia.cumple { border-color: #b7e0c4; background: var(--df-verde-bg); .valor { color: var(--df-verde); } }
+  &.supervivencia.falla { border-color: #f1c1c1; background: var(--df-rojo-bg); .valor { color: var(--df-rojo); } }
+}
+
+.graficos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.graficos .ancho { grid-column: span 2; }
+.lienzo { height: 260px; position: relative; }
+
+.seccion { font-size: 16px; margin: 28px 0 12px; }
+
+.decisiones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.desc { font-size: 12px; color: var(--df-muted); margin: -6px 0 10px; }
+
+.razon {
+  display: grid;
+  grid-template-columns: 14px 1fr auto 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--df-border);
+  font-size: 13px;
+
+  .valor { font-weight: 700; }
+  .ref { color: var(--df-muted); font-size: 12px; }
+}
+
+.leyenda { font-size: 11px; color: var(--df-muted); margin-top: 8px; text-align: right; }
+
+@media (max-width: 1280px) {
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .graficos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .decisiones { grid-template-columns: 1fr; }
+}

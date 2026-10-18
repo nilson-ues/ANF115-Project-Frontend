@@ -1,0 +1,9 @@
+.supuestos { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px; margin-bottom: 16px; }
+.dato { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--df-border); font-size: 13px; }
+.nota { font-size: 12px; color: var(--df-muted); margin-top: 8px; }
+.lienzo { height: 220px; position: relative; }
+.mensual { margin-bottom: 16px; }
+.titulo { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; h2 { margin: 0; flex: 1; } }
+.celda { width: 64px; text-align: right; font: inherit; padding: 4px 6px; border: 1px solid var(--df-border); border-radius: 6px; }
+.seccion { font-size: 16px; margin: 24px 0 12px; }
+@media (max-width: 1280px) { .supuestos { grid-template-columns: 1fr 1fr; } .ancho { grid-column: span 2; } }

@@ -1,0 +1,88 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>{{ def.titulo }}</h1>
+      <div class="sub">{{ def.descripcion }}</div>
+    </div>
+    <div class="acciones">
+      <mat-form-field appearance="outline" class="buscar">
+        <mat-label>Buscar</mat-label>
+        <input matInput [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+      </mat-form-field>
+      @if (puedeEscribir()) {
+        <button mat-flat-button (click)="abrir()"><span class="material-symbols-outlined">add</span> Nuevo {{ def.singular }}</button>
+      }
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  <div class="tabla-scroll">
+    <table class="estado">
+      <thead>
+        <tr>
+          @for (c of def.columnas; track c.clave) { <th [class.izq]="!c.tipo || c.tipo === 'etiqueta'">{{ c.titulo }}</th> }
+          @if (puedeEscribir()) { <th></th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of visibles(); track r.id) {
+          <tr [class.inactivo]="r['activo'] === false">
+            @for (c of def.columnas; track c.clave) {
+              @switch (c.tipo) {
+                @case ('dinero') { <td class="num">{{ $any(r[c.clave]) | dinero: true }}</td> }
+                @case ('porcentaje') { <td class="num">{{ numero(r[c.clave]) | pct }}</td> }
+                @case ('numero') { <td class="num">{{ numero(r[c.clave]) ?? '—' }}</td> }
+                @case ('booleano') { <td class="centro">@if (r[c.clave]) { <span class="chip verde">Sí</span> } @else { <span class="chip gris">No</span> }</td> }
+                @case ('etiqueta') { <td>@if (r[c.clave]) { <span class="chip gris">{{ r[c.clave] }}</span> }</td> }
+                @default { <td>{{ r[c.clave] ?? '' }}</td> }
+              }
+            }
+            @if (puedeEscribir()) {
+              <td class="centro"><button mat-icon-button (click)="abrir(r)" aria-label="Editar"><span class="material-symbols-outlined">edit</span></button></td>
+            }
+          </tr>
+        } @empty {
+          <tr><td [attr.colspan]="def.columnas.length + 1" class="vacio">Sin registros</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="conteo">{{ visibles().length }} de {{ registros().length }} registros</div>
+</div>
+
+@if (edicion(); as r) {
+  <div class="fondo" (click)="edicion.set(null)"></div>
+  <div class="dialogo" role="dialog">
+    <h2>{{ r.id ? 'Editar' : 'Nuevo' }} {{ def.singular }}</h2>
+    <form class="campos" (ngSubmit)="guardar()">
+      @for (c of def.campos; track c.clave) {
+        @switch (c.tipo) {
+          @case ('seleccion') {
+            <mat-form-field appearance="outline" [class.completo]="c.ancho">
+              <mat-label>{{ c.etiqueta }}</mat-label>
+              <mat-select [(ngModel)]="r[c.clave]" [name]="c.clave" [required]="!!c.requerido">
+                @for (o of opciones()[c.clave] ?? []; track $index) { <mat-option [value]="o.valor">{{ o.texto }}</mat-option> }
+              </mat-select>
+            </mat-form-field>
+          }
+          @case ('booleano') {
+            <mat-checkbox [(ngModel)]="r[c.clave]" [name]="c.clave">{{ c.etiqueta }}</mat-checkbox>
+          }
+          @default {
+            <mat-form-field appearance="outline" [class.completo]="c.ancho">
+              <mat-label>{{ c.etiqueta }}</mat-label>
+              <input matInput [(ngModel)]="r[c.clave]" [name]="c.clave" [required]="!!c.requerido"
+                [type]="c.tipo === 'texto' ? 'text' : c.tipo === 'correo' ? 'email' : 'number'"
+                [step]="c.tipo === 'dinero' ? '0.01' : c.tipo === 'porcentaje' ? '0.01' : '1'" />
+            </mat-form-field>
+          }
+        }
+      }
+      <div class="botones">
+        <button mat-button type="button" (click)="edicion.set(null)">Cancelar</button>
+        <button mat-flat-button type="submit" [disabled]="guardando() || faltantes(r)">Guardar</button>
+      </div>
+    </form>
+  </div>
+}

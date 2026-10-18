@@ -1,0 +1,13 @@
+.contenido { padding-top: 16px; display: grid; gap: 16px; }
+.parametro { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--df-border); }
+.nombre { font-weight: 600; font-size: 13.5px; }
+.desc { font-size: 12px; color: var(--df-muted); margin-top: 2px; }
+.falta { font-size: 12px; color: var(--df-amarillo); font-weight: 600; margin-top: 2px; }
+.valor { display: inline-flex; align-items: center; gap: 6px; }
+.valor input { width: 120px; text-align: right; font: inherit; padding: 6px 8px; border: 1px solid var(--df-border); border-radius: 6px; }
+.valor span { width: 34px; font-size: 12px; color: var(--df-muted); }
+input.texto { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--df-border); border-radius: 6px; }
+th.izq { text-align: left !important; }
+.pie { display: flex; justify-content: flex-end; }
+.campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 14px; }
+.ancho { grid-column: 1 / -1; }

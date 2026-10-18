@@ -1,0 +1,83 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Empresa y parámetros</h1>
+      <div class="sub">Todas las tasas y supuestos son configurables; los estados y razones se recalculan con estos valores</div>
+    </div>
+  </div>
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  <mat-tab-group animationDuration="0">
+    <mat-tab label="Parámetros financieros">
+      <div class="contenido">
+        @for (g of grupos(); track g.nombre) {
+          <div class="tarjeta">
+            <h2>{{ g.nombre }}</h2>
+            @for (p of g.items; track p.clave) {
+              <div class="parametro">
+                <div>
+                  <div class="nombre">{{ p.nombre }}</div>
+                  @if (p.descripcion) { <div class="desc">{{ p.descripcion }}</div> }
+                  @if (p.valor === null) { <div class="falta">Pendiente de definir</div> }
+                </div>
+                <div class="valor">
+                  <input type="number" [(ngModel)]="p.edicion" [disabled]="!editaFinanzas()" step="any" />
+                  <span>{{ p.unidad === 'dias' ? 'días' : p.unidad === 'num' ? '' : p.unidad }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (editaFinanzas()) {
+          <div class="pie"><button mat-flat-button (click)="guardarParametros()">Guardar parámetros</button></div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Estándares de la industria">
+      <div class="contenido">
+        <div class="aviso">Promedios de una muestra representativa de empresas del sector. Se usan como tercera referencia del semáforo de razones; deje vacío lo que no tenga fuente.</div>
+        <div class="tabla-scroll">
+          <table class="estado">
+            <thead><tr><th class="izq">Razón</th><th class="izq">Categoría</th><th>Valor</th><th class="izq">Fuente</th></tr></thead>
+            <tbody>
+              @for (s of estandares(); track s.clave) {
+                <tr>
+                  <td>{{ s.nombre }}</td>
+                  <td>{{ s.categoria }}</td>
+                  <td class="num"><span class="valor"><input type="number" [(ngModel)]="s.edicion" [disabled]="!editaFinanzas()" step="any" /><span>{{ unidadEstandar(s.unidad) }}</span></span></td>
+                  <td><input class="texto" [(ngModel)]="s.fuente" [disabled]="!editaFinanzas()" placeholder="Ej.: Superintendencia, gremial" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (editaFinanzas()) {
+          <div class="pie"><button mat-flat-button (click)="guardarEstandares()">Guardar estándares</button></div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Datos de la empresa">
+      @if (empresa(); as e) {
+        <div class="contenido">
+          <div class="tarjeta">
+            <form class="campos" (ngSubmit)="guardarEmpresa()">
+              @for (c of campos; track c.clave) {
+                <mat-form-field appearance="outline" [class.ancho]="c.ancho">
+                  <mat-label>{{ c.etiqueta }}</mat-label>
+                  @if (c.area) {
+                    <textarea matInput rows="3" [(ngModel)]="e[c.clave]" [name]="c.clave" [disabled]="!esAdmin()"></textarea>
+                  } @else {
+                    <input matInput [type]="c.tipo ?? 'text'" [(ngModel)]="e[c.clave]" [name]="c.clave" [disabled]="!esAdmin()" />
+                  }
+                </mat-form-field>
+              }
+              @if (esAdmin()) { <div class="pie ancho"><button mat-flat-button type="submit">Guardar datos</button></div> }
+            </form>
+          </div>
+        </div>
+      }
+    </mat-tab>
+  </mat-tab-group>
+</div>

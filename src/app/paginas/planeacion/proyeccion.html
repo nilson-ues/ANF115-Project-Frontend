@@ -1,0 +1,78 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Presupuesto y estado de resultados pro forma</h1>
+      <div class="sub">Pronóstico de ventas por crecimiento + inflación mensual (método de la tesis)</div>
+    </div>
+    <div class="acciones">
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Año a proyectar</mat-label>
+        <input matInput type="number" [ngModel]="anio()" (change)="anio.set(+$any($event.target).value)" />
+      </mat-form-field>
+      <df-teoria [temas]="teorias()" fuente="Unidad III" />
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  @if (datos(); as d) {
+    <div class="supuestos">
+      <div class="tarjeta">
+        <h2>Base {{ d.base.anio }} (real)</h2>
+        <div class="dato"><span>Ventas netas</span><b class="num">{{ d.base.ventasNetas | dinero: true }}</b></div>
+        <div class="dato"><span>Inventario final</span><b class="num">{{ d.base.inventarioFinal | dinero: true }}</b></div>
+        <div class="dato"><span>Reserva legal acumulada</span><b class="num">{{ d.base.reservaLegal | dinero: true }}</b></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Supuestos generales</h2>
+        <div class="dato"><span>Crecimiento de ventas</span><b>{{ d.supuestos.crecimiento | pct }}</b></div>
+        <div class="dato"><span>Costo de ventas</span><b>{{ d.supuestos.costoVentasPct | pct }}</b></div>
+        <div class="dato"><span>Gastos de venta / administración</span><b>{{ d.supuestos.gastosVentaPct | pct }} / {{ d.supuestos.gastosAdministracionPct | pct }}</b></div>
+        <div class="dato"><span>Gastos financieros mensuales</span><b>{{ d.supuestos.gastosFinancierosMes | dinero: true }}</b></div>
+        <div class="nota">Se modifican en Configuración → Parámetros</div>
+      </div>
+      <div class="tarjeta ancho">
+        <h2>Ventas, compras e inventario proyectados</h2>
+        <div class="lienzo"><canvas baseChart [type]="'bar'" [data]="$any(grafico())" [options]="$any(opciones)"></canvas></div>
+      </div>
+    </div>
+  }
+
+  <div class="tarjeta mensual">
+    <div class="titulo">
+      <h2>Supuestos mensuales {{ anio() }}</h2>
+      @if (auth.tieneRol(['ADMIN', 'FINANZAS'])) {
+        @if (editando()) {
+          <button mat-button (click)="editando.set(false); cargar(anio())">Cancelar</button>
+          <button mat-flat-button (click)="guardar()">Guardar y recalcular</button>
+        } @else {
+          <button mat-stroked-button (click)="editando.set(true)"><span class="material-symbols-outlined">edit</span> Editar</button>
+        }
+      }
+    </div>
+    <div class="tabla-scroll">
+      <table class="estado">
+        <thead><tr><th>Supuesto</th>@for (m of meses; track m) { <th>{{ m | mes }}</th> }</tr></thead>
+        <tbody>
+          <tr>
+            <td>Inflación del mes (%)</td>
+            @for (s of supuestos(); track s.mes) {
+              <td class="num">@if (editando()) { <input class="celda" type="number" step="0.01" [(ngModel)]="s.inflacion" /> } @else { {{ s.inflacion.toFixed(2) }} }</td>
+            }
+          </tr>
+          <tr>
+            <td>Compras (% de ventas)</td>
+            @for (s of supuestos(); track s.mes) {
+              <td class="num">@if (editando()) { <input class="celda" type="number" step="0.5" [(ngModel)]="s.compras" /> } @else { {{ s.compras.toFixed(2) }} }</td>
+            }
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (datos(); as d) {
+    <h2 class="seccion">Estado de resultados pro forma {{ d.anio }}</h2>
+    <df-tabla-mensual [filas]="d.lineas" [meses]="meses" />
+  }
+</div>
