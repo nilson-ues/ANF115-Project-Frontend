@@ -24,7 +24,8 @@ jobs:
           node-version: 24.x
           cache: npm
 
-      - run: npm ci
+      # El lock generado en macOS no trae dependencias opcionales de Linux (@emnapi)
+      - run: npm ci --legacy-peer-deps
 
       - name: Verificar configuración
         id: config
