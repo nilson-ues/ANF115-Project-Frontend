@@ -7,7 +7,7 @@ export const FEATURES = {
   cuentasPorPagar: false,
   partidas: false,
   cierreMensual: false,
-  puntoEquilibrio: false,
+  puntoEquilibrio: true,
   puntoEquilibrioProducto: false,
   presupuestoCaja: false,
   evaluacionProyectos: false,
@@ -21,7 +21,8 @@ export const RAZONES_VISIBLES: Record<string, boolean> = {
   edad_inventario: false,
   ciclo_conversion: false,
   cobertura_pagos_fijos: false,
-  valor_libros_accion: false
+  valor_libros_accion: false,
+  capital_trabajo_neto: false // se muestra en Fuentes y usos y capital de trabajo
 };
 
 export const activa = (f?: Feature) => !f || FEATURES[f];

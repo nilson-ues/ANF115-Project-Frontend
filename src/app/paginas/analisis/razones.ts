@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { razonVisible } from '../../core/features';
+import { CALCULO_RAZONES, ComponentesRazones, interpretarRazon, TEMA_CATEGORIA } from '../../core/temas';
 import { PeriodoService } from '../../core/periodo.service';
 import { RazonPipe } from '../../core/formato';
 import { mensajeError } from '../../core/interceptores';
@@ -35,6 +36,7 @@ interface RespuestaRazones {
   hastaMes: number;
   base: string;
   plazoCredito: number | null;
+  componentes: ComponentesRazones;
   razones: Razon[];
 }
 
@@ -89,6 +91,17 @@ export class Razones {
       this.cargando.set(false);
     }
   }
+
+  temaDe = (categoria: string) => TEMA_CATEGORIA[categoria] ?? 'Unidad II';
+  calculo = computed(() => {
+    const r = this.seleccion();
+    const d = this.datos();
+    return r && d && CALCULO_RAZONES[r.clave] ? CALCULO_RAZONES[r.clave](d.componentes, r.valor) : [];
+  });
+  interpretacion = computed(() => {
+    const r = this.seleccion();
+    return r ? interpretarRazon(r, this.datos()?.plazoCredito ?? null) : [];
+  });
 
   textoSemaforo(s: string) {
     return { verde: 'Favorable', amarillo: 'Dentro de tolerancia', rojo: 'Desfavorable', gris: 'Sin referencia' }[s] ?? s;

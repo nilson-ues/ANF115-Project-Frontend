@@ -47,19 +47,20 @@
 
       @if (seleccion(); as r) {
         <aside class="tarjeta detalle">
-          <div class="cat">{{ r.categoria }} · Decisión de {{ r.decision.toLowerCase() }}</div>
+          <div class="cat">{{ temaDe(r.categoria) }}</div>
+          <div class="decision">Decisión de {{ r.decision.toLowerCase() }}</div>
           <h2>{{ r.nombre }}</h2>
           <div class="valor">{{ r.valor | razon: r.unidad }}</div>
           <div class="formula">{{ r.formula }}</div>
           <h3>¿Qué significa?</h3>
           <p>{{ r.definicion }}</p>
+          @if (calculo().length) {
+            <h3>Cálculo con los datos del período</h3>
+            @for (c of calculo(); track $index) { <p class="calc">{{ c }}</p> }
+          }
           <h3>¿Cómo se interpreta?</h3>
           <p>{{ r.interpretacion }}</p>
-          @if (r.clave === 'periodo_cobro' && d.plazoCredito) {
-            <div class="aviso" [class.ok]="(r.valor ?? 0) <= d.plazoCredito">
-              Plazo de crédito a clientes: {{ d.plazoCredito }} días. La empresa cobra en promedio en {{ r.valor | razon: 'dias' }}.
-            </div>
-          }
+          @for (t of interpretacion(); track $index) { <p class="dinamica">{{ t }}</p> }
           <div class="direccion">{{ direccion(r) }}</div>
           <div class="comparaciones">
             <div><span class="chip" [class]="r.semaforoAnterior">{{ textoSemaforo(r.semaforoAnterior) }}</span> vs. año anterior (series temporales)</div>

@@ -1,0 +1,101 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Punto de equilibrio</h1>
+      <div class="sub">Nivel de ventas en el que la empresa no gana ni pierde · Cifras acumuladas del período</div>
+    </div>
+    <div class="acciones">
+      <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
+      <df-que-significa [tema]="tema" [datos]="datos()" />
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  @if (datos(); as d) {
+    <div class="kpis">
+      <div class="tarjeta">
+        <div class="etiqueta">Punto de equilibrio</div>
+        <div class="grande">{{ d.puntoEquilibrio | dinero: true }}</div>
+        <div class="nota">Ventas del período: {{ d.ventas | dinero: true }}</div>
+      </div>
+      <div class="tarjeta" [class.alerta]="(d.margenSeguridad ?? 0) < 0">
+        <div class="etiqueta">Margen de seguridad</div>
+        <div class="grande">{{ d.margenSeguridad | pct }}</div>
+        <div class="nota">Cuánto pueden caer las ventas antes de perder</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Margen de contribución</div>
+        <div class="grande">{{ d.margenContribucion | pct }}</div>
+        <div class="nota">1 − Costos variables / Ventas</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Comprobación</div>
+        @if (d.comprobacion; as c) {
+          <span class="chip" [class]="+c.utilidad === 0 ? 'verde' : 'rojo'">Utilidad en el PE = {{ c.utilidad | dinero: true }}</span>
+        } @else {
+          <span class="chip rojo">Sin punto de equilibrio</span>
+        }
+      </div>
+    </div>
+
+    <div class="dos">
+      <div class="tarjeta">
+        <h2>Ingresos vs. costos totales</h2>
+        <div class="lienzo"><canvas baseChart type="line" [data]="grafico()" [options]="opciones"></canvas></div>
+      </div>
+      <div>
+        <div class="tarjeta">
+          <div class="titulo">
+            <h2>Clasificación de costos</h2>
+            @if (auth.tieneRol(['ADMIN', 'FINANZAS'])) {
+              @if (editando()) {
+                <button mat-button (click)="editando.set(false); cargar(anio()!, escenario(), mes())">Cancelar</button>
+                <button mat-flat-button (click)="guardar()">Guardar</button>
+              } @else {
+                <button mat-stroked-button (click)="editando.set(true)"><span class="material-symbols-outlined">edit</span> Cambiar</button>
+              }
+            }
+          </div>
+          <table class="estado">
+            <thead><tr><th>Rubro</th><th>Monto</th><th class="centro">Comportamiento</th></tr></thead>
+            <tbody>
+              @for (r of d.rubros; track r.rubro; let i = $index) {
+                <tr>
+                  <td>{{ r.nombre }}</td>
+                  <td class="num">{{ r.monto | dinero }}</td>
+                  <td class="centro">
+                    @if (editando()) {
+                      <mat-button-toggle-group [(ngModel)]="clasificacion()[i].comportamiento" hideSingleSelectionIndicator>
+                        <mat-button-toggle value="FIJO">Fijo</mat-button-toggle>
+                        <mat-button-toggle value="VARIABLE">Variable</mat-button-toggle>
+                      </mat-button-toggle-group>
+                    } @else {
+                      <span class="chip" [class]="r.comportamiento === 'FIJO' ? 'gris' : 'verde'">{{ r.comportamiento === 'FIJO' ? 'Fijo' : 'Variable' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+              <tr class="subtotal"><td>Costos fijos</td><td class="num">{{ d.costosFijos | dinero }}</td><td></td></tr>
+              <tr class="subtotal"><td>Costos variables</td><td class="num">{{ d.costosVariables | dinero }}</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        @if (d.comprobacion; as c) {
+          <div class="tarjeta espacio">
+            <h2>Estado de resultados en el punto de equilibrio</h2>
+            <table class="estado">
+              <tbody>
+                <tr><td>Ventas</td><td class="num">{{ c.ventas | dinero }}</td></tr>
+                <tr><td>(-) Costos variables ({{ d.razonVariable | pct }})</td><td class="num">{{ c.costosVariables | dinero }}</td></tr>
+                <tr class="subtotal"><td>Margen de contribución</td><td class="num">{{ +c.ventas - +c.costosVariables | dinero }}</td></tr>
+                <tr><td>(-) Costos fijos</td><td class="num">{{ c.costosFijos | dinero }}</td></tr>
+                <tr class="total"><td>Utilidad antes de impuesto y reserva</td><td class="num">{{ c.utilidad | dinero }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

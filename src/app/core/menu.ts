@@ -50,8 +50,10 @@ export const MENU: GrupoMenu[] = [
     unidad: 'Unidad II',
     items: [
       { ruta: '/analisis/razones', titulo: 'Razones financieras', icono: 'query_stats', roles: FIN },
-      { ruta: '/analisis/horizontal', titulo: 'Análisis horizontal', icono: 'compare_arrows', roles: FIN },
-      { ruta: '/analisis/equilibrio', titulo: 'Punto de equilibrio', icono: 'show_chart', roles: FIN, pendiente: true, feature: 'puntoEquilibrio' }
+      { ruta: '/analisis/vertical-horizontal', titulo: 'Análisis vertical y horizontal', icono: 'compare_arrows', roles: FIN },
+      { ruta: '/analisis/dupont', titulo: 'Sistema DuPont y sumario', icono: 'schema', roles: FIN },
+      { ruta: '/analisis/fuentes-usos', titulo: 'Fuentes y usos y capital de trabajo', icono: 'swap_vert', roles: FIN },
+      { ruta: '/analisis/equilibrio', titulo: 'Punto de equilibrio', icono: 'show_chart', roles: FIN, feature: 'puntoEquilibrio' }
     ]
   },
   {

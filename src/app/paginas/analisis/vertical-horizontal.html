@@ -1,0 +1,150 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Análisis vertical y horizontal</h1>
+      <div class="sub">Peso de cada cuenta dentro de su estado y variación entre dos períodos</div>
+    </div>
+    <div class="acciones">
+      @if (pestana() === 0) {
+        <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
+        <df-que-significa [tema]="temaVertical" [datos]="vertical()" />
+      } @else {
+        <df-que-significa [tema]="temaHorizontal" [datos]="horizontal()" />
+      }
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  <mat-tab-group animationDuration="0" [selectedIndex]="pestana()" (selectedIndexChange)="pestana.set($event)">
+    <mat-tab label="Vertical">
+      @if (vertical(); as v) {
+        <div class="comprobacion">
+          <span class="chip" [class]="v.comprobacion.resultados === 1 ? 'verde' : 'rojo'">Estado de resultados suma {{ v.comprobacion.resultados | pct }}</span>
+          <span class="chip" [class]="v.comprobacion.activo === 1 ? 'verde' : 'rojo'">Activo suma {{ v.comprobacion.activo | pct }}</span>
+          <span class="chip" [class]="v.comprobacion.pasivoPatrimonio === 1 ? 'verde' : 'rojo'">Pasivo + patrimonio suma {{ v.comprobacion.pasivoPatrimonio | pct }}</span>
+        </div>
+        <div class="dos">
+          <div>
+            <h2>Estado de resultados <span class="base">base: ventas netas</span></h2>
+            <div class="tabla-scroll">
+              <table class="estado">
+                <thead><tr><th>Concepto</th><th>Monto</th><th>%</th><th></th></tr></thead>
+                <tbody>
+                  @for (f of v.resultados; track f.clave) {
+                    <tr [class]="$any(f).tipo">
+                      <td>{{ f.nombre }}</td>
+                      <td class="num" [class.negativo]="neg(f.monto)">{{ f.monto | dinero }}</td>
+                      <td class="num">{{ f.porcentaje | pct }}</td>
+                      <td class="barra"><div [style.width.%]="ancho(f.porcentaje)"></div></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h2>Balance general <span class="base">base: activo total / pasivo + patrimonio</span></h2>
+            <div class="tabla-scroll">
+              <table class="estado">
+                <thead><tr><th>Cuenta</th><th>Saldo</th><th>%</th><th></th></tr></thead>
+                <tbody>
+                  @for (f of v.balance; track f.codigo) {
+                    <tr [class]="'nivel-' + f.nivel">
+                      <td>{{ f.nombre }}</td>
+                      <td class="num" [class.negativo]="neg(f.monto)">{{ f.monto | dinero }}</td>
+                      <td class="num">{{ f.porcentaje | pct }}</td>
+                      <td class="barra"><div [style.width.%]="ancho(f.porcentaje)"></div></td>
+                    </tr>
+                  }
+                  <tr class="total"><td>Total activo</td><td class="num">{{ v.totales.activo | dinero }}</td><td class="num">100.0%</td><td></td></tr>
+                  <tr class="total"><td>Total pasivo + patrimonio</td><td class="num">{{ v.totales.pasivoMasPatrimonio | dinero }}</td><td class="num">100.0%</td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+    </mat-tab>
+
+    <mat-tab label="Horizontal">
+      <div class="controles tarjeta">
+        <mat-button-toggle-group [ngModel]="tipo()" (ngModelChange)="cambiarTipo($event)" hideSingleSelectionIndicator>
+          <mat-button-toggle value="acumulado">Acumulado / año</mat-button-toggle>
+          <mat-button-toggle value="mes">Mes contra mes</mat-button-toggle>
+        </mat-button-toggle-group>
+        <div class="periodo">
+          <span class="etiqueta">Período actual</span>
+          <mat-form-field appearance="outline" class="compacto">
+            <mat-label>Año</mat-label>
+            <mat-select [ngModel]="actualAnio()" (ngModelChange)="actualAnio.set($event)">
+              @for (a of aniosReales(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="compacto">
+            <mat-label>Mes</mat-label>
+            <mat-select [ngModel]="actualMes()" (ngModelChange)="actualMes.set($event)">
+              @if (tipo() === 'acumulado') { <mat-option [value]="null">Año completo</mat-option> }
+              @for (m of mesesDe(actualAnio()); track m) { <mat-option [value]="m">{{ mesesLargos[m - 1] }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <span class="material-symbols-outlined vs">compare_arrows</span>
+        <div class="periodo">
+          <span class="etiqueta">Período base</span>
+          <mat-form-field appearance="outline" class="compacto">
+            <mat-label>Año</mat-label>
+            <mat-select [ngModel]="baseAnio()" (ngModelChange)="baseAnio.set($event)">
+              @for (a of aniosReales(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="compacto">
+            <mat-label>Mes</mat-label>
+            <mat-select [ngModel]="baseMes()" (ngModelChange)="baseMes.set($event)">
+              @if (tipo() === 'acumulado') { <mat-option [value]="null">Igual al actual</mat-option> }
+              @for (m of mesesDe(baseAnio()); track m) { <mat-option [value]="m">{{ mesesLargos[m - 1] }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      @if (horizontal(); as h) {
+        <div class="leyenda">
+          Comparando <b>{{ descripcion(h.actual, h.tipo) }}</b> contra <b>{{ descripcion(h.base, h.tipo) }}</b>.
+          <span class="resaltada">Resaltado</span> = variación mayor a {{ h.umbral | pct }} (umbral configurable en Parámetros).
+        </div>
+        <h2>Estado de resultados</h2>
+        <ng-container *ngTemplateOutlet="tablaH; context: { filas: h.resultados, h }" />
+        <h2>Balance general <span class="base">saldos al cierre de cada mes</span></h2>
+        <ng-container *ngTemplateOutlet="tablaH; context: { filas: h.balance, h }" />
+      }
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #tablaH let-filas="filas" let-h="h">
+  <div class="tabla-scroll">
+    <table class="estado">
+      <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>{{ h.actual.anio }}@if (h.tipo === 'mes' || h.actual.mes !== 12) { · {{ h.actual.mes | mes }} }</th>
+          <th>{{ h.base.anio }}@if (h.tipo === 'mes' || h.base.mes !== 12) { · {{ h.base.mes | mes }} }</th>
+          <th>Variación $</th><th>Variación %</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of filas; track $index) {
+          <tr [class]="f.tipo ?? ('nivel-' + f.nivel)" [class.resaltada]="f.resaltar">
+            <td>{{ f.nombre }}</td>
+            <td class="num" [class.negativo]="neg(f.actual)">{{ f.actual | dinero }}</td>
+            <td class="num" [class.negativo]="neg(f.base)">{{ f.base | dinero }}</td>
+            <td class="num" [class.negativo]="neg(f.variacion)">{{ f.variacion | dinero }}</td>
+            <td class="num" [class.negativo]="(f.variacionPct ?? 0) < 0">{{ f.variacionPct | pct }}</td>
+            <td class="barra"><div [class.baja]="(f.variacionPct ?? 0) < 0" [style.width.%]="ancho(f.variacionPct)"></div></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>

@@ -1,0 +1,15 @@
+h2 { font-size: 15px; margin: 18px 0 10px; }
+.base { font-size: 12px; font-weight: 400; color: var(--df-muted); margin-left: 6px; }
+.comprobacion { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.dos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+td.barra { width: 120px; }
+td.barra div { height: 8px; border-radius: 4px; background: var(--df-accent); max-width: 100%; }
+td.barra div.baja { background: var(--df-rojo); }
+.controles { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 14px; padding: 12px 16px; }
+.periodo { display: flex; align-items: center; gap: 8px; }
+.etiqueta { font-size: 12px; font-weight: 600; color: var(--df-muted); text-transform: uppercase; }
+.vs { color: var(--df-muted); }
+.leyenda { font-size: 13px; color: var(--df-muted); margin: 14px 0 0; }
+.resaltada { background: var(--df-amarillo-bg); padding: 1px 6px; border-radius: 4px; color: var(--df-amarillo); font-weight: 600; }
+tr.resaltada td { background: var(--df-amarillo-bg) !important; }
+@media (max-width: 1280px) { .dos { grid-template-columns: 1fr; } }

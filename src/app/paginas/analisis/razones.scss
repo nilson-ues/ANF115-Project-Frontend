@@ -9,7 +9,10 @@
   top: 16px;
 
   .cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--df-accent); font-weight: 600; }
+  .decision { font-size: 12px; color: var(--df-muted); margin-top: 2px; }
   h2 { font-size: 18px; margin: 6px 0 4px; }
+  .calc { font-variant-numeric: tabular-nums; font-size: 12.5px; margin-bottom: 4px; }
+  .dinamica { margin-top: 6px; padding-left: 10px; border-left: 3px solid var(--df-accent); }
   .valor { font-size: 30px; font-weight: 700; color: var(--df-navy); font-variant-numeric: tabular-nums; }
   .formula { font-family: Menlo, monospace; font-size: 12.5px; background: var(--df-accent-soft); padding: 10px 12px; border-radius: 8px; margin: 12px 0; }
   h3 { font-size: 13px; margin: 14px 0 4px; }

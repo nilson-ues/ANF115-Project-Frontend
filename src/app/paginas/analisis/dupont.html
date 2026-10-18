@@ -1,0 +1,124 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Sistema DuPont y sumario de razones</h1>
+      <div class="sub">Qué explica el rendimiento de los accionistas y cómo evolucionan todas las razones</div>
+    </div>
+    <div class="acciones">
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Año</mat-label>
+        <mat-select [ngModel]="anio()" (ngModelChange)="anio.set($event)">
+          @for (a of anios(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      @if (pestana() === 0) {
+        <mat-form-field appearance="outline" class="compacto">
+          <mat-label>Comparar con</mat-label>
+          <mat-select [ngModel]="baseAnio()" (ngModelChange)="baseAnio.set($event)">
+            @for (a of anios(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Hasta</mat-label>
+        <mat-select [ngModel]="mes()" (ngModelChange)="mes.set($event)">
+          <mat-option [value]="null">Año completo</mat-option>
+          @for (m of meses; track $index) { <mat-option [value]="$index + 1">{{ m }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      @if (pestana() === 0) { <df-que-significa [tema]="temaDupont" [datos]="dupont()" /> }
+      @else { <df-que-significa [tema]="temaSumario" [datos]="sumarioVisible()" /> }
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  <mat-tab-group animationDuration="0" [selectedIndex]="pestana()" (selectedIndexChange)="pestana.set($event)">
+    <mat-tab label="Sistema DuPont">
+      @if (dupont(); as d) {
+        <div class="base">{{ d.base_calculo }} · Comparando {{ d.actual.anio }} contra {{ d.base.anio }}</div>
+        <div class="arbol">
+          <div class="nivel">
+            <div class="nodo principal">
+              <div class="titulo">ROE</div>
+              <div class="valor">{{ d.actual.roe | pct }}</div>
+              <div class="antes">{{ d.base.anio }}: {{ d.base.roe | pct }}</div>
+              <div class="cambio" [class.negativo]="(d.cambios.roe ?? 0) < 0">{{ d.cambios.roe | pct }}</div>
+            </div>
+          </div>
+          <div class="conector">=</div>
+          <div class="nivel dos">
+            <div class="nodo">
+              <div class="titulo">ROA</div>
+              <div class="valor">{{ d.actual.roa | pct }}</div>
+              <div class="antes">{{ d.base.anio }}: {{ d.base.roa | pct }}</div>
+              <div class="cambio" [class.negativo]="(d.cambios.roa ?? 0) < 0">{{ d.cambios.roa | pct }}</div>
+            </div>
+            <div class="por">×</div>
+            <div class="nodo" [class.destacado]="mayorCambio() === 'multiplicador'">
+              <div class="titulo">Multiplicador de apalancamiento</div>
+              <div class="valor">{{ d.actual.multiplicador | razon: 'veces' }}</div>
+              <div class="antes">{{ d.base.anio }}: {{ d.base.multiplicador | razon: 'veces' }}</div>
+              <div class="cambio" [class.negativo]="(d.cambios.multiplicador ?? 0) < 0">{{ d.cambios.multiplicador | pct }}</div>
+            </div>
+          </div>
+          <div class="conector">=</div>
+          <div class="nivel dos">
+            <div class="nodo" [class.destacado]="mayorCambio() === 'margenNeto'">
+              <div class="titulo">Margen de utilidad neta</div>
+              <div class="valor">{{ d.actual.margenNeto | pct }}</div>
+              <div class="antes">{{ d.base.anio }}: {{ d.base.margenNeto | pct }}</div>
+              <div class="cambio" [class.negativo]="(d.cambios.margenNeto ?? 0) < 0">{{ d.cambios.margenNeto | pct }}</div>
+            </div>
+            <div class="por">×</div>
+            <div class="nodo" [class.destacado]="mayorCambio() === 'rotacionActivos'">
+              <div class="titulo">Rotación de activos totales</div>
+              <div class="valor">{{ d.actual.rotacionActivos | razon: 'veces' }}</div>
+              <div class="antes">{{ d.base.anio }}: {{ d.base.rotacionActivos | razon: 'veces' }}</div>
+              <div class="cambio" [class.negativo]="(d.cambios.rotacionActivos ?? 0) < 0">{{ d.cambios.rotacionActivos | pct }}</div>
+            </div>
+            <div class="por"></div>
+            <div class="nodo vacio-nodo"></div>
+          </div>
+        </div>
+        <div class="comprobacion">
+          <span class="chip" [class]="d.actual.roa === d.actual.roaDirecto ? 'verde' : 'rojo'">ROA DuPont = ROA directo ({{ d.actual.roaDirecto | pct }})</span>
+          <span class="chip" [class]="d.actual.roe === d.actual.roeDirecto ? 'verde' : 'rojo'">ROE DuPont = ROE directo ({{ d.actual.roeDirecto | pct }})</span>
+          <span class="nota">El recuadro resaltado es el componente que más cambió.</span>
+        </div>
+      }
+    </mat-tab>
+
+    <mat-tab label="Sumario de razones">
+      @if (sumarioVisible(); as s) {
+        <div class="tabla-scroll espacio">
+          <table class="estado">
+            <thead>
+              <tr>
+                <th>Razón</th>
+                @for (p of s.periodos; track p.anio) { <th>{{ p.anio }}@if (p.mes !== 12) { · ene-{{ meses[p.mes - 1].slice(0, 3).toLowerCase() }} } </th> }
+                <th>Estándar</th>
+                <th class="centro">Tendencia</th>
+                <th class="centro">Semáforo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of categorias(); track c.nombre) {
+                <tr class="nivel-1"><td [attr.colspan]="s.periodos.length + 4">{{ c.nombre }}</td></tr>
+                @for (r of c.razones; track r.clave) {
+                  <tr>
+                    <td [matTooltip]="r.formula">{{ r.nombre }}</td>
+                    @for (v of r.valores; track $index) { <td class="num">{{ v | razon: r.unidad }}</td> }
+                    <td class="num">{{ r.estandar | razon: r.unidad }}</td>
+                    <td class="centro"><span class="material-symbols-outlined tendencia" [class]="r.tendencia" [matTooltip]="textoTendencia(r.tendencia)">{{ flecha(r.tendencia) }}</span></td>
+                    <td class="centro"><span class="punto" [class]="r.semaforo" [matTooltip]="'Contra ' + r.referencia"></span></td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </mat-tab>
+  </mat-tab-group>
+</div>

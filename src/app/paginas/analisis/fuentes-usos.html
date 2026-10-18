@@ -1,0 +1,99 @@
+<div class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Fuentes y usos y capital de trabajo</h1>
+      @if (datos(); as d) { <div class="sub">Cambios entre el balance de {{ fecha(d.base) }} y el de {{ fecha(d.actual) }}</div> }
+    </div>
+    <div class="acciones">
+      <span class="etiqueta">Balance base</span>
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Año</mat-label>
+        <mat-select [ngModel]="baseAnio()" (ngModelChange)="baseAnio.set($event)">
+          @for (a of anios(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Mes</mat-label>
+        <mat-select [ngModel]="baseMes()" (ngModelChange)="baseMes.set($event)">
+          <mat-option [value]="null">Igual al actual</mat-option>
+          @for (m of mesesDe(baseAnio()); track m) { <mat-option [value]="m">{{ meses[m - 1] }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <span class="etiqueta">Balance actual</span>
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Año</mat-label>
+        <mat-select [ngModel]="anio()" (ngModelChange)="anio.set($event)">
+          @for (a of anios(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="compacto">
+        <mat-label>Mes</mat-label>
+        <mat-select [ngModel]="mes()" (ngModelChange)="mes.set($event)">
+          <mat-option [value]="null">Diciembre / último</mat-option>
+          @for (m of mesesDe(anio()); track m) { <mat-option [value]="m">{{ meses[m - 1] }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <df-que-significa [tema]="tema" [datos]="datos()" />
+    </div>
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (error()) { <div class="aviso error">{{ error() }}</div> }
+
+  @if (datos(); as d) {
+    <div class="kpis">
+      <div class="tarjeta">
+        <div class="etiqueta">Capital de trabajo neto {{ d.capitalTrabajo.actual.anio }}</div>
+        <div class="grande">{{ d.capitalTrabajo.actual.neto | dinero: true }}</div>
+        <div class="nota">{{ d.capitalTrabajo.base.anio }}: {{ d.capitalTrabajo.base.neto | dinero: true }}</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Financiamiento del activo corriente</div>
+        <div class="mezcla">
+          <div class="corto" [style.width.%]="(d.capitalTrabajo.actual.financiadoCortoPlazo ?? 0) * 100"></div>
+          <div class="largo" [style.width.%]="(d.capitalTrabajo.actual.financiadoLargoPlazo ?? 0) * 100"></div>
+        </div>
+        <div class="nota"><span class="cuadro corto"></span> Pasivo corriente {{ d.capitalTrabajo.actual.financiadoCortoPlazo | pct }}
+          · <span class="cuadro largo"></span> Fondos de largo plazo {{ d.capitalTrabajo.actual.financiadoLargoPlazo | pct }}</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Comprobación</div>
+        @if (+d.diferencia === 0) {
+          <span class="chip verde">Fuentes = Usos</span>
+        } @else {
+          <span class="chip amarillo">Diferencia {{ d.diferencia | dinero: true }}</span>
+          <div class="nota">Por redondeo de los balances de la tesis</div>
+        }
+      </div>
+    </div>
+
+    <div class="dos">
+      @for (lado of [{ titulo: 'Fuentes', filas: d.fuentes, total: d.totalFuentes }, { titulo: 'Usos', filas: d.usos, total: d.totalUsos }]; track lado.titulo) {
+        <div>
+          <h2>{{ lado.titulo }}</h2>
+          <div class="tabla-scroll">
+            <table class="estado">
+              <thead><tr><th>Cuenta</th><th>{{ d.base.anio }}</th><th>{{ d.actual.anio }}</th><th>Variación</th><th class="col-total">{{ lado.titulo }}</th></tr></thead>
+              <tbody>
+                @for (f of lado.filas; track f.codigo) {
+                  <tr>
+                    <td>{{ f.nombre }} <span class="tipo">{{ f.codigo.startsWith('1') ? 'Activo' : f.codigo.startsWith('2') ? 'Pasivo' : 'Patrimonio' }}</span></td>
+                    <td class="num">{{ f.base | dinero }}</td>
+                    <td class="num">{{ f.actual | dinero }}</td>
+                    <td class="num" [class.negativo]="neg(f.variacion)">{{ f.variacion | dinero }}</td>
+                    <td class="num col-total">{{ f.monto | dinero }}</td>
+                  </tr>
+                }
+                <tr class="total"><td colspan="4">Total de {{ lado.titulo.toLowerCase() }}</td><td class="num">{{ lado.total | dinero }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="tarjeta grafico">
+      <h2>Capital de trabajo neto por mes · {{ d.actual.anio }}</h2>
+      <div class="lienzo"><canvas baseChart type="bar" [data]="grafico()" [options]="opciones"></canvas></div>
+    </div>
+  }
+</div>
