@@ -151,7 +151,7 @@ interface Edicion { id?: number; fecha: string; tipo: TipoMovimiento; categoria_
   styles: `
     .filtros .ancho { width: 260px; }
     .resumen { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; color: var(--df-muted); b { color: var(--df-text); } }
-    table.estado td:first-child { min-width: 100px; }
+    table.estado td:first-child, table.estado thead th:first-child { min-width: 100px; width: 110px; }
     .acciones-fila { white-space: nowrap; }
     .paginacion { display: flex; align-items: center; gap: 4px; justify-content: flex-end; margin-top: 6px; .conteo { margin: 0 8px 0 0; } }
     .gasto { --mat-button-filled-container-color: var(--df-rojo); }

@@ -202,6 +202,10 @@ export class PresupuestoCaja {
     return `${base} El crecimiento es moderado; el método de ratio conserva la estacionalidad y muestra mejor los meses de mayor necesidad de efectivo (${q.resumen.mesesDeficit} meses con déficit frente a ${p.resumen.mesesDeficit} del promedio).`;
   });
 
+  constructor() {
+    this.calcular();
+  }
+
   cargarGuia() {
     this.ventas = [...GUIA_1.ventas];
     this.s = { ...GUIA_1 };
