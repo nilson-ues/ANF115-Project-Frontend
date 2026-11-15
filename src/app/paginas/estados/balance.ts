@@ -1,3 +1,6 @@
+import { TablaExport, tablaMensual } from '../../core/exportar';
+import { Exportar } from '../../shared/exportar';
+import { MESES_LARGOS } from '../../core/formato';
 import { Component, computed } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DineroPipe, MesPipe } from '../../core/formato';
@@ -15,7 +18,7 @@ interface Balance {
 
 @Component({
   selector: 'df-balance',
-  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule, DineroPipe],
+  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule, DineroPipe, Exportar],
   template: `
     <div class="pagina">
       <div class="encabezado">
@@ -25,6 +28,7 @@ interface Balance {
         </div>
         <div class="acciones">
           <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
+          @if (datos()) { <df-exportar [tablas]="exportar" [archivo]="'balance-general-' + anio()" /> }
           @if (datos(); as d) { <df-teoria [temas]="[d.teoria, vertical]" fuente="Unidad I · Unidad II" /> }
         </div>
       </div>
@@ -62,4 +66,9 @@ export class BalanceGeneral extends PaginaPeriodo<Balance> {
     if (!d) return [];
     return d.totales.diferencia.map((v, i) => (Math.abs(Number(v)) > 0.05 ? new MesPipe().transform(d.meses[i]) : null)).filter((x) => x) as string[];
   });
+
+  exportar = (): TablaExport[] => {
+    const d = this.datos()!;
+    return [tablaMensual('Balance general', `Al cierre de ${MESES_LARGOS[d.meses[d.meses.length - 1] - 1].toLowerCase()} de ${this.anio()} · Escenario ${this.escenario() === 'REAL' ? 'real' : 'presupuesto'} · US$`, this.filas().map((f) => ({ ...f, tipo: f.tipo ?? `nivel-${f.nivel}` })), d.meses, { porcentaje: '% Vertical' })];
+  };
 }

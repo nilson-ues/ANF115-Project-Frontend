@@ -1,3 +1,5 @@
+import { TablaExport } from '../../core/exportar';
+import { Exportar } from '../../shared/exportar';
 import { Component } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DineroPipe, esNegativo, MesPipe } from '../../core/formato';
@@ -17,7 +19,7 @@ interface Patrimonio {
 
 @Component({
   selector: 'df-patrimonio',
-  imports: [SelectorPeriodo, TeoriaPanel, MatProgressBarModule, DineroPipe, MesPipe],
+  imports: [SelectorPeriodo, TeoriaPanel, MatProgressBarModule, DineroPipe, MesPipe, Exportar],
   template: `
     <div class="pagina">
       <div class="encabezado">
@@ -26,6 +28,7 @@ interface Patrimonio {
           @if (datos(); as d) { <div class="sub">Del 1 de enero al cierre de {{ d.hastaMes | mes: true }} de {{ d.anio }}</div> }
         </div>
         <div class="acciones">
+          @if (datos()) { <df-exportar [tablas]="exportar" [archivo]="'cambios-patrimonio-' + anio()" /> }
           <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
           @if (datos(); as d) { <df-teoria [temas]="[d.teoria]" fuente="Unidad I" /> }
         </div>
@@ -63,4 +66,14 @@ interface Patrimonio {
 export class CambiosPatrimonio extends PaginaPeriodo<Patrimonio> {
   ruta = '/estados/patrimonio';
   neg = esNegativo;
+
+  exportar = (): TablaExport[] => {
+    const d = this.datos()!;
+    return [{
+      titulo: 'Estado de cambios en el patrimonio', subtitulo: `Del 1 de enero al mes ${d.hastaMes} de ${d.anio} · US$`,
+      columnas: [{ titulo: 'Componente', clave: 'nombre' }, { titulo: 'Saldo inicial', clave: 'inicial', tipo: 'dinero' }, { titulo: 'Movimiento', clave: 'variacion', tipo: 'dinero' }, { titulo: 'Saldo final', clave: 'final', tipo: 'dinero' }],
+      filas: [...d.filas, { nombre: 'Total patrimonio', ...d.totales }],
+      resaltadas: [d.filas.length]
+    }];
+  };
 }

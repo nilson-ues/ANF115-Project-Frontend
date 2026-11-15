@@ -1,3 +1,6 @@
+import { TablaExport, tablaMensual } from '../../core/exportar';
+import { Exportar } from '../../shared/exportar';
+import { MESES_LARGOS } from '../../core/formato';
 import { Component, computed } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DineroPipe } from '../../core/formato';
@@ -21,7 +24,7 @@ interface Flujo {
 
 @Component({
   selector: 'df-flujo',
-  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule, DineroPipe],
+  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule, DineroPipe, Exportar],
   template: `
     <div class="pagina">
       <div class="encabezado">
@@ -31,6 +34,7 @@ interface Flujo {
         </div>
         <div class="acciones">
           <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
+          @if (datos()) { <df-exportar [tablas]="exportar" [archivo]="'flujo-efectivo-' + anio()" /> }
           @if (datos(); as d) { <df-teoria [temas]="[d.teoria, decisiones]" fuente="Unidad I" /> }
         </div>
       </div>
@@ -70,4 +74,9 @@ export class FlujoEfectivo extends PaginaPeriodo<Flujo> {
     filas.push({ ...d.efectivoBalance, nombre: 'Efectivo según balance general', tipo: 'sub' });
     return filas;
   });
+
+  exportar = (): TablaExport[] => {
+    const d = this.datos()!;
+    return [tablaMensual('Estado de flujo de efectivo', `Al cierre de ${MESES_LARGOS[d.meses[d.meses.length - 1] - 1].toLowerCase()} de ${this.anio()} · Escenario ${this.escenario() === 'REAL' ? 'real' : 'presupuesto'} · US$`, this.filas(), d.meses, { total: 'Año' })];
+  };
 }

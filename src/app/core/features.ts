@@ -6,12 +6,9 @@ export const FEATURES = {
   cuentasPorCobrar: false,
   cuentasPorPagar: false,
   partidas: false,
-  cierreMensual: false,
   puntoEquilibrio: true,
   puntoEquilibrioProducto: false,
-  presupuestoCaja: false,
-  evaluacionProyectos: false,
-  unidad4: false
+  unidad4: true
 };
 
 export type Feature = keyof typeof FEATURES;

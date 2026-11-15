@@ -20,4 +20,12 @@ export class ApiService {
   put<T>(ruta: string, cuerpo: unknown) {
     return firstValueFrom(this.http.put<T>(`${API_URL}${ruta}`, cuerpo));
   }
+
+  patch<T>(ruta: string, cuerpo: unknown) {
+    return firstValueFrom(this.http.patch<T>(`${API_URL}${ruta}`, cuerpo));
+  }
+
+  delete<T>(ruta: string) {
+    return firstValueFrom(this.http.delete<T>(`${API_URL}${ruta}`));
+  }
 }
