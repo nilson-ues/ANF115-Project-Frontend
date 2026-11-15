@@ -1,3 +1,6 @@
+import { TablaExport, tablaMensual } from '../../core/exportar';
+import { Exportar } from '../../shared/exportar';
+import { MESES_LARGOS } from '../../core/formato';
 import { Component } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { SelectorPeriodo } from '../../shared/periodo';
@@ -22,7 +25,7 @@ const TEORIA_ER: Teoria = {
 
 @Component({
   selector: 'df-resultados',
-  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule],
+  imports: [SelectorPeriodo, TablaMensual, TeoriaPanel, MatProgressBarModule, Exportar],
   template: `
     <div class="pagina">
       <div class="encabezado">
@@ -32,6 +35,7 @@ const TEORIA_ER: Teoria = {
         </div>
         <div class="acciones">
           <df-periodo [(anio)]="anio" [(escenario)]="escenario" [(mes)]="mes" />
+          @if (datos()) { <df-exportar [tablas]="exportar" [archivo]="'estado-resultados-' + anio()" /> }
           @if (datos(); as d) { <df-teoria [temas]="[teoria, d.teoria]" fuente="Unidad I · Unidad II" /> }
         </div>
       </div>
@@ -46,4 +50,9 @@ const TEORIA_ER: Teoria = {
 export class Resultados extends PaginaPeriodo<EstadoResultados> {
   ruta = '/estados/resultados';
   teoria = TEORIA_ER;
+
+  exportar = (): TablaExport[] => {
+    const d = this.datos()!;
+    return [tablaMensual('Estado de resultados', `Al cierre de ${MESES_LARGOS[d.meses[d.meses.length - 1] - 1].toLowerCase()} de ${this.anio()} · Escenario ${this.escenario() === 'REAL' ? 'real' : 'presupuesto'} · US$`, d.lineas, d.meses, { total: 'Acumulado', porcentaje: '% Ventas' })];
+  };
 }

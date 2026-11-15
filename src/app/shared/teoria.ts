@@ -43,7 +43,7 @@ export interface Teoria {
     section { padding: 14px 0; border-bottom: 1px solid var(--df-border); }
     h3 { margin: 0 0 8px; font-size: 16px; }
     .formula { font-family: 'SFMono-Regular', Menlo, monospace; font-size: 12.5px; background: var(--df-accent-soft);
-      color: var(--df-navy); padding: 10px 12px; border-radius: 8px; line-height: 1.5; }
+      color: var(--df-navy); padding: 10px 12px; border-radius: 8px; line-height: 1.5; white-space: pre-line; }
     p { color: var(--df-text); line-height: 1.55; margin: 10px 0 6px; }
     .ref { font-size: 12px; color: var(--df-muted); }
   `
